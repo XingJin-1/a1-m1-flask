@@ -1,0 +1,69 @@
+@projectKey = RDDLTST1
+@host = test-rddl-develop.eu-de-3.icp.infineon.com
+#@host = localhost:8091
+@version = v1
+@authorizedUser = {"id": 12, "authorization": "Bearer 0004QtuH5kgczlm4ez4ZkG6mPLOt"}
+@functionName = xing-waveform-extractor-5
+#@jobId = 4465b635-be31-48fa-a237-6cbd38df33e6
+@jobId = aebca892-de69-45ea-9a69-9f6d13deb0c1
+### Register Function
+###
+POST /{{version}}/projects/{{projectKey}}/serverless
+Host: {{host}}
+Content-Type: application/json
+Authorized-User: {{authorizedUser}}
+
+{
+    "repositoryUrl": "https://bitbucket.vih.infineon.com/scm/~xingjin/waveform-extractor.git",
+    "name": "{{functionName}}"
+}
+
+###
+### Function Status
+###
+GET /{{version}}/projects/{{projectKey}}/serverless/{{functionName}}
+Host: {{host}}
+Content-Type: application/json
+Authorized-User: {{authorizedUser}}
+
+###
+### Execute Function
+###
+POST /{{version}}/projects/{{projectKey}}/serverless/{{functionName}}
+Host: {{host}}
+Content-Type: application/json
+Authorized-User: {{authorizedUser}}
+
+{
+    "pageSize": 10,
+    "pageNumber": 1,
+    "filter": "test_order: Serverless_Testing_For_WE_Agent_1"
+}
+
+###
+### Send Job Notification
+###
+POST /{{version}}/serverless/job/notification
+Host: {{host}}
+Content-Type: application/json
+Ce-Id: say-hello
+Ce-Specversion: 1.0
+Ce-Type: serverless-fn-notification
+
+{
+    "jobID":  "4465b635-be31-48fa-a237-6cbd38df33e6",
+    "apiKey": "d3cfced7-8702-4df0-9ec9-97a93d1df582",
+    "state": "FAILED",
+    "current": 3,
+    "total": 200,
+    "error": "dummy error",
+    "sequence": 4
+}
+
+###
+### Job Status
+###
+GET /{{version}}/projects/{{projectKey}}/serverless/{{functionName}}/job/{{jobId}}
+Host: {{host}}
+Content-Type: application/json
+Authorized-User: {{authorizedUser}}

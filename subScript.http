@@ -1,0 +1,25 @@
+@host = https://cpee.org/flow/engine/56932
+@logUrl = http://131.130.37.62:9211/logs
+#{{host}}/{{version}}/projects/{{projectKey}}/serverless
+@sub = 'topic'  + '=' + 'state' + '&' +'events' + '=' + 'change' + '&' + 'url' +  '=' + '{{logUrl}}' + '&' +'id' + '=' '_xing' 
+@localHost = http://131.130.37.62:9211/
+
+###
+### Send subsription
+###
+PUT {{host}}/notifications/subscriptions/_testsubscribe2/
+Content-Type: application/json
+
+{
+    "data": "{{sub}}"
+}
+
+###
+### get logs
+###
+POST {{localHost}}/logs
+Content-Type: application/json
+
+{
+    "data": "{{sub}}"
+}

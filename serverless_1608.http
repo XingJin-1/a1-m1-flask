@@ -1,0 +1,62 @@
+@projectKey = RDDLTST1
+@host = https://rd-datalake-test.icp.infineon.com
+@version = v1
+@functionName = xing-deep-indexing-2
+@jobId = f764367b-b3b9-4efa-a5a6-f57ce22c94ea
+@Authorization= Bearer 0004g7saGP791s6PcfW23ZBpTpYg
+
+###
+### Register Function
+###
+POST {{host}}/{{version}}/projects/{{projectKey}}/serverless
+Content-Type: application/json
+Authorization: {{Authorization}}
+
+{
+    "repositoryUrl": "https://bitbucket.vih.infineon.com/scm/~xingjin/extract-signals.git",
+    "name": "{{functionName}}"
+}
+
+###
+### Function Status
+###
+GET {{host}}/{{version}}/projects/{{projectKey}}/serverless/{{functionName}}
+Content-Type: application/json
+Authorization: {{Authorization}}
+
+###
+### Execute Function
+###
+POST {{host}}/{{version}}/projects/{{projectKey}}/serverless/{{functionName}}
+Content-Type: application/json
+Authorization: {{Authorization}}
+
+{
+    "pageSize": 10,
+    "pageNumber": 1,
+    "filter": "test_order: Serverless_Testing_For_WE_Agent_5",
+    "args": {
+    "vi": [
+      "40c06a4f395442c9be9960863c3a575f",
+      "cc8acc6ba8e44f19b84c2d5cf7c73334"
+    ],
+    "vo": [
+      "40c06a4f395442c9be9960863c3a575f",
+      "cc8acc6ba8e44f19b84c2d5cf7c73334"
+    ]
+  }
+}
+
+###
+### Job Status
+###
+GET {{host}}/{{version}}/projects/{{projectKey}}/serverless/{{functionName}}/job/{{jobId}}
+Content-Type: application/json
+Authorization: {{Authorization}}
+
+###
+### Function Log
+###
+GET {{host}}/{{version}}/projects/{{projectKey}}/serverless/{{functionName}}/log?pageNumber=1&pageSize=1000
+Content-Type: application/json
+Authorization: {{Authorization}}

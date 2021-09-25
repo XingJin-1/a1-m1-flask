@@ -1,4 +1,6 @@
-from flask import Flask, jsonify, json, request, url_for, redirect, flash, send_from_directory, session, send_file
+from datetime import date
+
+from flask import Flask, jsonify, json, request, url_for, redirect, flash, send_from_directory, session, send_file, render_template, Response
 from flask.wrappers import Response
 
 from flask_restful import Api, Resource, reqparse, abort, fields, marshal_with
@@ -6,6 +8,10 @@ from flask_sqlalchemy import SQLAlchemy
 
 from werkzeug.utils import secure_filename 
 import os 
+
+import random 
+import json
+import requests
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -25,7 +31,38 @@ def allowed_file(filename):
 #     app.run(host='0.0.0.0',port=9211)
 
 # #url_for('static', filename='test_data_1.mat')
+customer_put_args = reqparse.RequestParser()
+customer_update_args = reqparse.RequestParser()
 
+item_put_args = reqparse.RequestParser()
+item_update_args = reqparse.RequestParser()
+
+transaction_put_args = reqparse.RequestParser()
+transaction_update_args = reqparse.RequestParser()
+
+cpee_put_args = reqparse.RequestParser()
+
+def define_arguments():
+	customer_put_args.add_argument("name", type=str, help="Name of the customer is required", required=True)
+	customer_put_args.add_argument("balance", type=float, help="Balance of the customer", required=True)
+
+	customer_update_args.add_argument("name", type=str, help="Name of the customer is required")
+	customer_update_args.add_argument("balance", type=float, help="Balance of the customer")
+
+	item_put_args.add_argument("name", type=str, help="Name of the item is required", required=True)
+	item_put_args.add_argument("price", type=float, help="Price of the item", required=True)
+	item_put_args.add_argument("description", type=str, help="Description of the item is required", required=True)
+	item_put_args.add_argument("stock", type=int, help="Stock of the item", required=True)
+
+	item_update_args.add_argument("name", type=str, help="Name of the item is required")
+	item_update_args.add_argument("price", type=float, help="Price of the item")
+	item_update_args.add_argument("description", type=str, help="Description of the item is required")
+	item_update_args.add_argument("stock", type=int, help="Stock of the item")
+
+	transaction_put_args.add_argument("price", type=float, help="Price of the item", required=True)
+
+	cpee_put_args.add_argument("url", type=str, help="Callback url", required=True)
+	
 UPLOAD_FOLDER= './uploaded-file'
 ALLOWED_EXTENSIONS = {'txt', 'jpg', 'mat', 'doc', 'docx'}
 app = Flask(__name__)
@@ -42,14 +79,9 @@ class HelloWorld(Resource):
 	def get(self):
 		return {'Hello':'world'}
 
-class VideoModel(db.Model):
+class CallbackModel(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
-	name = db.Column(db.String(100), nullable=False)
-	views = db.Column(db.Integer, nullable=False)
-	likes = db.Column(db.Integer, nullable=False)
-
-	def __repr__(self):
-		return f"Video(name = {name}, views = {views}, likes = {likes})"
+	url = db.Column(db.String(100), nullable=False)
 
 class CustomerModel(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
@@ -59,29 +91,29 @@ class CustomerModel(db.Model):
 	def __repr__(self):
 		return f"Customer(id = {id}, name = {name}, balance = {balance})"
 
-#db.create_all()
+class ItemModel(db.Model):
+	id = db.Column(db.Integer, primary_key=True)
+	name = db.Column(db.String(100), nullable=False)
+	price = db.Column(db.Float, nullable=True)
+	description = db.Column(db.String(300), nullable=True)
+	stock = db.Column(db.Integer, primary_key=False)
 
-video_put_args = reqparse.RequestParser()
-video_put_args.add_argument("name", type=str, help="Name of the video is required", required=True)
-video_put_args.add_argument("views", type=int, help="Views of the video", required=True)
-video_put_args.add_argument("likes", type=int, help="Likes on the video", required=True)
-video_update_args = reqparse.RequestParser()
-video_update_args.add_argument("name", type=str, help="Name of the video is required")
-video_update_args.add_argument("views", type=int, help="Views of the video")
-video_update_args.add_argument("likes", type=int, help="Likes on the video")
-resource_fields = {
-	'id': fields.Integer,
-	'name': fields.String,
-	'views': fields.Integer,
-	'likes': fields.Integer
-}
+	def __repr__(self):
+		return f"Item(id = {id}, name = {name}, price = {price}, description = {description}, stock = {stock})"
 
-customer_put_args = reqparse.RequestParser()
-customer_put_args.add_argument("name", type=str, help="Name of the customer is required", required=True)
-customer_put_args.add_argument("balance", type=float, help="Balance of the customer", required=True)
-customer_update_args = reqparse.RequestParser()
-customer_update_args.add_argument("name", type=str, help="Name of the customer is required")
-customer_update_args.add_argument("balance", type=float, help="Balance of the customer")
+class TransactionModel(db.Model):
+	id_customer = db.Column(db.Integer, primary_key=True)
+	id_item = db.Column(db.Integer, primary_key=True)
+	price = db.Column(db.Float, nullable=True)
+
+	def __repr__(self):
+		return f"Transaction(id_customer = {id_customer}, id_item = {id_item}, price = {price})"
+
+# ****************** run it at every beging when db has been changed ******************
+db.create_all()
+# ****************** run it at every beging when db has been changed ******************
+
+define_arguments()
 
 resource_fields_customer = {
 	'id': fields.Integer,
@@ -89,58 +121,30 @@ resource_fields_customer = {
 	'balance': fields.Float
 }
 
-class Video(Resource):
-	@marshal_with(resource_fields)
-	def get(self, video_id):
-		result = VideoModel.query.filter_by(id=video_id).first()
-		# drink = Drink.query.get_or_404(id)
-		if not result:
-			abort(404, message="Could not find video with that id")
-		return result
+resource_fields_item = {
+	'id': fields.Integer,
+	'name': fields.String,
+	'price': fields.Float,
+	'description': fields.String,
+	'stock': fields.Integer,
+}
 
-	@marshal_with(resource_fields)
+resource_fields_transction = {
+	'id_customer': fields.Integer,
+	'id_item': fields.Integer,
+	'price': fields.Float
+}
+
+resource_fields_cpee = {
+	'id': fields.Integer,
+	'url': fields.String
+}
+
+class CustomerList(Resource):
+	@marshal_with(resource_fields_customer)
 	def get(self):
-		result = VideoModel.query.all()
+		result = CustomerModel.query.all()
 		return result
-
-	@marshal_with(resource_fields)
-	def put(self, video_id):
-		args = video_update_args.parse_args()
-		result = VideoModel.query.filter_by(id=video_id).first()
-		if result:
-			abort(409, message="Video id taken...")
-
-		video = VideoModel(id=video_id, name=args['name'], views=args['views'], likes=args['likes'])
-		db.session.add(video)
-		db.session.commit()
-		return video, 201
-
-	@marshal_with(resource_fields)
-	def patch(self, video_id):
-		args = video_update_args.parse_args()
-		result = VideoModel.query.filter_by(id=video_id).first()
-		if not result:
-			abort(404, message="Video doesn't exist, cannot update")
-
-		if args['name']:
-			result.name = args['name']
-		if args['views']:
-			result.views = args['views']
-		if args['likes']:
-			result.likes = args['likes']
-
-		db.session.commit()
-		return result
-
-	# def post(self, video_id):
-	# 	some_json = request.get_json()
-
-	def delete(self, video_id):
-		#abort_if_video_id_doesnt_exist(video_id)
-		result = VideoModel.query.filter_by(id=video_id).first()
-		db.session.delete(result)
-		db.session.commit()
-		return '', 204
 
 class Customer(Resource):
 	@marshal_with(resource_fields_customer)
@@ -149,11 +153,6 @@ class Customer(Resource):
 		# drink = Drink.query.get_or_404(id)
 		if not result:
 			abort(404, message="Could not find customer with that id")
-		return result
-
-	@marshal_with(resource_fields_customer)
-	def get(self):
-		result = CustomerModel.query.all()
 		return result
 
 	@marshal_with(resource_fields_customer)
@@ -169,7 +168,7 @@ class Customer(Resource):
 		return customer, 201
 
 	@marshal_with(resource_fields_customer)
-	def patch(self, customer_id):
+	def post(self, customer_id):
 		args = customer_update_args.parse_args()
 		result = CustomerModel.query.filter_by(id=customer_id).first()
 		if not result:
@@ -193,19 +192,247 @@ class Customer(Resource):
 		db.session.commit()
 		return '', 204
 
-api.add_resource(Video, "/video/<int:video_id>", "/videos")
-api.add_resource(HelloWorld, "/")
+class ItemList(Resource):
+	@marshal_with(resource_fields_item)
+	def get(self):
+		result = ItemModel.query.all()
+		return result
 
-api.add_resource(Customer, "/customer/<int:customer_id>", "/customers")
+class Item(Resource):
+	@marshal_with(resource_fields_item)
+	def get(self, item_id):
+		result = ItemModel.query.filter_by(id=item_id).first()
+		# drink = Drink.query.get_or_404(id)
+		if not result:
+			abort(404, message="Could not find item with that id")
+		return result
+
+	@marshal_with(resource_fields_item)
+	def put(self, item_id):
+		args = item_put_args.parse_args()
+		result = ItemModel.query.filter_by(id=item_id).first()
+		if result:
+			abort(409, message="Item id taken...")
+
+		item = ItemModel(id=item_id, name=args['name'], price=args['price'], description=args['description'], stock=args['stock'])
+		db.session.add(item)
+		db.session.commit()
+		return item, 201
+
+	@marshal_with(resource_fields_item)
+	def post(self, item_id):
+		args = item_update_args.parse_args()
+		result = ItemModel.query.filter_by(id=item_id).first()
+		if not result:
+			abort(404, message="Item doesn't exist, cannot update")
+
+		if args['name']:
+			result.name = args['name']
+		if args['price']:
+			result.price = args['price']
+		if args['description']:
+			result.description = args['description']
+		if args['stock']:
+			result.stock = args['stock']
+
+		db.session.commit()
+		return result
+
+	# def post(self, video_id):
+	# 	some_json = request.get_json()
+	
+	def delete(self, item_id):
+		#abort_if_video_id_doesnt_exist(video_id)
+		result = ItemModel.query.filter_by(id=item_id).first()
+		db.session.delete(result)
+		db.session.commit()
+		return '', 204
+
+class TransactionList(Resource):
+	@marshal_with(resource_fields_transction)
+	def get(self):
+		result = TransactionModel.query.all()
+		return result
+
+class Transaction(Resource):
+	@marshal_with(resource_fields_transction)
+	def get(self, id_customer, id_item):
+		result = TransactionModel.query.filter_by(id_customer=id_customer, id_item=id_item).first()
+		# drink = Drink.query.get_or_404(id)
+		if not result:
+			abort(404, message="Could not find transction with that id")
+		return result
+
+	@marshal_with(resource_fields_transction)
+	def put(self, id_customer, id_item):
+		args = transaction_put_args.parse_args()
+		result = TransactionModel.query.filter_by(id_customer=id_customer, id_item=id_item).first()
+		if result:
+			abort(409, message="Transaction id taken...")
+
+		transaction = TransactionModel(id_customer=id_customer, id_item=id_item, price=args['price'])
+		db.session.add(transaction)
+		db.session.commit()
+		return transaction, 201
+
+	@marshal_with(resource_fields_transction)
+	def post(self, id_customer, id_item):
+		args = transaction_put_args.parse_args()
+		result = TransactionModel.query.filter_by(id_customer=id_customer, id_item=id_item).first()
+		if not result:
+			abort(404, message="Transaction doesn't exist, cannot update")
+
+		if args['price']:
+			result.price = args['price']
+
+		db.session.commit()
+		return result
+
+	# def post(self, video_id):
+	# 	some_json = request.get_json()
+	
+	def delete(self, id_customer, id_item):
+		#abort_if_video_id_doesnt_exist(video_id)
+		result = TransactionModel.query.filter_by(id_customer=id_customer, id_item=id_item).first()
+		db.session.delete(result)
+		db.session.commit()
+		return '', 204
+
+class CPEEList(Resource):
+	@marshal_with(resource_fields_cpee)
+	def get(self):
+		result = CallbackModel.query.all()
+		return result
+
+class CPEE(Resource):
+	@marshal_with(resource_fields_cpee)
+	def get(self, cpee_id):
+		result = CallbackModel.query.filter_by(id = cpee_id).first()
+		# drink = Drink.query.get_orz_404(id)
+		if not result:
+			abort(404, message="Could not find item with that id")
+		return result
+
+	@marshal_with(resource_fields_cpee)
+	def put(self, cpee_id):
+		args = cpee_put_args.parse_args()
+		result = CallbackModel.query.filter_by(id = cpee_id).first()
+		if result:
+			abort(409, message="Item id taken...")
+
+		cpee = CallbackModel(id=cpee_id,  url = args['url'])
+		db.session.add(cpee)
+		db.session.commit()
+		return cpee, 201
+
+api.add_resource(HelloWorld, "/")
+#api.add_resource(Customer, "/customer/<int:customer_id>", "/customer/<int:customer_id>/update1")
+api.add_resource(Customer, "/customer/<int:customer_id>")
+api.add_resource(CustomerList, "/customers")
+api.add_resource(Item, "/item/<int:item_id>")
+api.add_resource(ItemList, "/items")
+api.add_resource(Transaction, "/transaction/<int:id_customer>/<int:id_item>")
+api.add_resource(TransactionList, "/transactions")
+
+api.add_resource(CPEE, "/cpee/<int:cpee_id>")
+api.add_resource(CPEEList, "/cpees")
+
+@app.route("/customer/update", methods=['GET', 'POST'])
+@marshal_with(resource_fields_customer)
+def update_customer():
+	customer_id = request.args.get('customer_id')
+	new_balance = request.args.get('new_balance')
+
+	result = CustomerModel.query.filter_by(id=customer_id).first()
+	result.balance = new_balance
+
+	db.session.commit()
+	return result
+    
+@app.route("/item/update", methods=['GET', 'POST'])
+@marshal_with(resource_fields_item)
+def update_item():
+	item_id = request.args.get('item_id')
+	new_stock = request.args.get('new_stock')
+
+	result = ItemModel.query.filter_by(id=item_id).first()
+	result.stock = new_stock
+	
+	db.session.commit()
+	return result
+
+@app.route("/transaction/update", methods=['GET', 'POST'])
+@marshal_with(resource_fields_transction)
+def put_transaction():
+	id_customer = request.args.get('id_customer')
+	id_item = request.args.get('id_item')
+	result = TransactionModel.query.filter_by(id_customer=id_customer, id_item=id_item).first()
+	if result:
+		abort(409, message="Transaction id taken...")
+
+	transaction = TransactionModel(id_customer=id_customer, id_item=id_item, price=request.args.get('price'))
+	db.session.add(transaction)
+	db.session.commit()
+	return transaction, 201
+
+@app.route("/logs",  methods=['POST'])
+def get_log():
+	msg = "log received"
+	return msg, 200
+ # parse request .requests()
+
+@app.route("/check_difference", methods=['GET'])
+def get_difference():
+	# chance of empty 25%
+	#items= ['BUC_VQ_3V3_sample=1[]_tambient=25[°C]_VQtyp=3.3[V]_TEMP=25[C]_variant=Water[]_VIN=3.62[V]_IQ=0[mA]_00001.mat', 'BUC_VQ_3V3_sample=1[]_tambient=25[°C]_VQtyp=3.3[V]_TEMP=25[C]_variant=Water[]_VIN=3.87[V]_IQ=0[mA]_00001.mat', 'BUC_VQ_3V3_sample=1[]_tambient=25[°C]_VQtyp=3.3[V]_TEMP=25[C]_variant=Water[]_VIN=3[V]_IQ=0[mA]_00001.mat', 'BUC_VQ_3V3_sample=1[]_tambient=25[°C]_VQtyp=3.3[V]_TEMP=25[C]_variant=Water[]_VIN=5.2[V]_IQ=0[mA]_00001.mat', ' ']
+	items=['s1', 's2', ' ', ' ']
+	#items = return {'Hello':'world'}
+	#return_dic = {}
+	#return_dic['update'] = random.choice(items)
+	#return json.dumps(return_dic)
+	return_string = '{"update":' + '"' + random.choice(items) + '"' + '}'
+	#return return_string
+	return json.loads(return_string)
+
+@app.route("/hardcoded_response", methods=['GET'])
+def get_hardcoded_response():
+	return {'return':'HardcodedValue'}
+
+@app.route("/asnyc_test", methods=['GET'])
+def async_test():
+	resp = Response("Foo bar baz")
+	resp.headers['CPEE-CALLBACK'] = 'true'
+	url_callback = request.headers.get('Cpee-Callback')
+
+	#item = CallbackModel(id=0,  url=request.headers.get('Cpee-Callback')),
+	cpee = CallbackModel(id=1,  url = url_callback)
+	db.session.add(cpee)
+	db.session.commit()
+	return resp
+
+@app.route("/asnyc_return", methods=['GET'])
+def async_return():
+	return_dict = {"value", "x"}
+
+	url = CallbackModel.query.filter_by(id=0).first()
+	# drink = Drink.query.get_orz_404(id)
+	#r = requests.put(url, data = return_dict, headers={"content-type": "application/json; charset=utf-8","CPEE-UPDATE": "true"})
+	return 200
+
+
+@app.route("/ask_user", methods=['GET'])
+def ask_user():
+	return_dic = {}
+	#return_dic['x'] = request.args.get("x")
+	#return_dic['y'] = request.args.get("y")
+	return_dic['work'] = 'BUC_VQ_3V3_sample=1[]_tambient=25[°C]_VQtyp=3.3[V]_TEMP=25[C]_variant=Water[]_VIN=3.62[V]_IQ=0[mA]_00001.mat'
+	return render_template('hello.php', input = return_dic)
 
 if __name__ == "__main__":
     #sess = session.Session()
     #sess.init_app(app)
-    #app.run(host='0.0.0.0',port=9211)
-	app.run(debug=True)
-    
-
-
+    app.run(host='0.0.0.0',port=9211, debug=True)
+	#app.run(debug=True)
 
 
 
