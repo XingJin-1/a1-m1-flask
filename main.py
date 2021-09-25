@@ -394,11 +394,7 @@ def get_difference():
 	#return return_string
 	return json.loads(return_string)
 
-@app.route("/hardcoded_response", methods=['GET'])
-def get_hardcoded_response():
-	return {'return':'HardcodedValue'}
-
-@app.route("/asnyc_test", methods=['GET'])
+@app.route("/asnyc_request", methods=['GET'])
 def async_test():
 	resp = Response("Foo bar baz")
 	resp.headers['CPEE-CALLBACK'] = 'true'
@@ -425,11 +421,6 @@ def async_return():
 	r = requests.put(return_callback.url, data = return_dict, headers={"content-type": "application/json; charset=utf-8"})
 	#r = requests.put(ccu, data=json.dumps(payload), headers={"content-type": "application/json; charset=utf-8","CPEE-UPDATE": "true"})
 	return {'Tast':'Continue'}
-
-@app.route("/get_test", methods=  ['GET'])
-def get_test():
-	return_call = CallbackModel.query.filter_by(id=1).first()
-	return return_call.url
 
 @app.route("/ask_user", methods=['GET'])
 def ask_user():
