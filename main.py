@@ -403,11 +403,16 @@ def async_test():
 	resp = Response("Foo bar baz")
 	resp.headers['CPEE-CALLBACK'] = 'true'
 	url_callback = request.headers.get('Cpee-Callback')
-
-	#item = CallbackModel(id=0,  url=request.headers.get('Cpee-Callback')),
-	cpee = CallbackModel(id=1,  url = url_callback)
-	db.session.add(cpee)
-	db.session.commit()
+	result = CallbackModel.query.filter_by(id=1).first()
+	if result:
+		result.url = url_callback
+		db.session.commit()
+	else:
+		#item = CallbackModel(id=0,  url=request.headers.get('Cpee-Callback')),
+		# cpee = CallbackModel(id=cpee_id,  url = args['url'])
+		cpee = CallbackModel(id=1,  url = url_callback)
+		db.session.add(cpee)
+		db.session.commit()
 	return resp
 
 @app.route("/asnyc_return", methods=['GET'])
