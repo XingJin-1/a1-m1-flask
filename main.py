@@ -419,12 +419,16 @@ def async_test():
 def async_return():
 	return_dict = {"value", "x"}
 
-	url = CallbackModel.query.filter_by(id=1).first()
+	url = CallbackModel.query.filter_by(id=0).first()
 	# drink = Drink.query.get_orz_404(id)
-	r = requests.put(url, data = return_dict, headers={"content-type": "application/json; charset=utf-8","CPEE-UPDATE": "true"})
-
+	#r = requests.put(url, data = return_dict, headers={"content-type": "application/json; charset=utf-8","CPEE-UPDATE": "true"})
+	r = requests.put(url, data = return_dict, headers={"content-type": "application/json; charset=utf-8"})
 	return {'Tast':'Continue'}
 
+@app.route("/get_test", methods=  ['GET'])
+def get_test():
+	return_call = CallbackModel.query.filter_by(id=1).first()
+	return return_call.url
 
 @app.route("/ask_user", methods=['GET'])
 def ask_user():
