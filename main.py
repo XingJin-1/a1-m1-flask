@@ -417,7 +417,7 @@ def async_test():
 
 @app.route("/asnyc_return", methods=['GET'])
 def async_return():
-	return_dict = {"value", "x"}
+	return_dict = "{\"value\", \"x\"}"
 
 	return_callback = CallbackModel.query.filter_by(id=0).first()
 	# drink = Drink.query.get_orz_404(id)
