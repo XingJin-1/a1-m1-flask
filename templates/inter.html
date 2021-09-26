@@ -4,8 +4,6 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
     <script>
         function myFunctionDone(){
-          returnData = '{"Value" : "Done"}';
-          const returnDataJSON = JSON.parse(returnData);
           const result = 'Done';
           $.ajax({
               type: 'PUT',   //type is any HTTP method
@@ -15,14 +13,27 @@
               },
               data: result,      //Data as js object
               success: function () {
-                  return result;
                   alert("Done!");
+                  return result;
               }
           });
           return result;
         };   
         function myFunctionPartial(){
-            alert("View Partial Report!");
+            const result = 'Partial';
+            $.ajax({
+              type: 'PUT',   //type is any HTTP method
+              url: '{{ url }}',    //Your api url
+              headers:{
+                'Content-Type': 'text/plain; charset=UTF-8',
+              },
+              data: result,      //Data as js object
+              success: function () {
+                alert("View Partial Report!");
+                  return result;
+              }
+          });
+          return result;
         };   
       </script>
   </head>
