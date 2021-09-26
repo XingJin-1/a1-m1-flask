@@ -1,9 +1,31 @@
 <html>
   <head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script>
+        function myFunctionDone(){
+          $.ajax({
+              url: '{{ url }}',    //Your api url
+              type: 'PUT',   //type is any HTTP method
+              data: {
+                  data: '1'
+              },      //Data as js object
+              success: function () {
+                  alert("Done!");
+              }
+          });
+        };   
+        function myFunctionPartial(){
+            alert("View Partial Report!");
+        };   
+      </script>
   </head>
   <body>
     {% if working_item %}
       Currently is Wroking on: {{ working_item }}!
+    {% else %}
+      Hello guest! 
+    {% if url %}
+      Currently is Wroking on: {{ url }}!
     {% else %}
       Hello guest! 
     {% endif %}
@@ -11,22 +33,3 @@
       <input id="button2" type="submit" name="button2" onclick="myFunctionPartial();" value="View Partial Report"/>
   </body>
 </html>
-
-
-<script>
-  function myFunctionDone(){
-    $.ajax({
-        url: '{{ working_item }}',    //Your api url
-        type: 'PUT',   //type is any HTTP method
-        data: {
-            data: '1'
-        },      //Data as js object
-        success: function () {
-            alert("Done!");
-        }
-    });
-  };   
-  function myFunctionPartial(){
-      alert("View Partial Report!");
-  };   
-</script>
