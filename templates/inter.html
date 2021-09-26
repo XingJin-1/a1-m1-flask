@@ -1,6 +1,6 @@
 <html>
   <head>
-    <META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <META http-equiv="Content-Type" content="text/html; charset=UTF-8" http-equiv="refresh" content="1">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
     <script>
         function myFunctionDone(){
@@ -14,6 +14,7 @@
               data: result,      //Data as js object
               success: function () {
                   alert("Done!");
+                  myFunctionView();
                   return result;
               }
           });
@@ -29,26 +30,54 @@
               },
               data: result,      //Data as js object
               success: function () {
-                alert("View Partial Report!");
+                  alert("View Partial Report!");
+                  myFunctionView();
                   return result;
               }
           });
           return result;
-        };   
-      </script>
+        };  
+        
+        function myFunctionView(){
+            //var BASE = 'http://127.0.0.1:9211/cpee/' + '{{ids[0]}}'
+            var BASE = window.location.protocol + 'cpee/' + '{{ids[0]}}'
+            var newProcessed = {'processed': 1}
+            $.ajax({
+              type: 'POST',   //type is any HTTP method
+              url: BASE,    //Your api url
+              data: newProcessed,      //Data as js object
+              success: function () {
+                  alert("Update Successfully!");
+                  window.location.reload();
+              }
+          });
+        };  
+    </script>
   </head>
   <body>
+    <p>
     {% if working_item %}
-      Currently is Wroking on: {{ working_item }}!
+      Currently is Wroking on: {{ working_item }}
     {% else %}
-      Hello guest! 
+      No Working Report.
     {% endif %}
+    </p>
+    <p>
+    <ul id="urlsUI">
+    Following Reports Should be Processed:
     {% if urls %}
-      Currently is Wroking on: {{ urls }}!
+      {% for url in urls %}
+        <li>{{url}}</li>
+      {% endfor %}
     {% else %}
-      Hello guest! 
+      No Working Report.
     {% endif %}
+    </ul>
+    </p>
+    <p>
       <input id="button1" type="submit" name="button1" onclick="myFunctionDone();" value="Done"/>
       <input id="button2" type="submit" name="button2" onclick="myFunctionPartial();" value="View Partial Report"/>
+      <input id="button3" type="submit" name="button3" onclick="myFunctionView();" value="View Test"/>
+    </p>
   </body>
 </html>

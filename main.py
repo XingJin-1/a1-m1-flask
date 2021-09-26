@@ -41,6 +41,7 @@ transaction_put_args = reqparse.RequestParser()
 transaction_update_args = reqparse.RequestParser()
 
 cpee_put_args = reqparse.RequestParser()
+cpee_update_args = reqparse.RequestParser()
 
 def define_arguments():
 	customer_put_args.add_argument("name", type=str, help="Name of the customer is required", required=True)
@@ -62,6 +63,10 @@ def define_arguments():
 	transaction_put_args.add_argument("price", type=float, help="Price of the item", required=True)
 
 	cpee_put_args.add_argument("url", type=str, help="Callback url", required=True)
+	cpee_put_args.add_argument("processed", type=int, help="Callback processed", required=True)
+
+	cpee_update_args.add_argument("url", type=str, help="Name of the customer is required")
+	cpee_update_args.add_argument("processed", type=int, help="Balance of the customer")
 	
 UPLOAD_FOLDER= './uploaded-file'
 ALLOWED_EXTENSIONS = {'txt', 'jpg', 'mat', 'doc', 'docx'}
@@ -78,10 +83,6 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 class HelloWorld(Resource):
 	def get(self):
 		return {'Hello':'world'}
-
-class CallbackModel(db.Model):
-	id = db.Column(db.Integer, primary_key=True)
-	url = db.Column(db.String(100), nullable=False)
 
 class CustomerModel(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
@@ -109,6 +110,10 @@ class TransactionModel(db.Model):
 	def __repr__(self):
 		return f"Transaction(id_customer = {id_customer}, id_item = {id_item}, price = {price})"
 
+class CallbackModel(db.Model):
+	id = db.Column(db.Integer, primary_key=True)
+	url = db.Column(db.String(100), nullable=False)
+	processed = db.Column(db.Integer, default = 0, nullable=False)
 # ****************** run it at every beging when db has been changed ******************
 #db.create_all()
 # ****************** run it at every beging when db has been changed ******************
@@ -137,7 +142,8 @@ resource_fields_transction = {
 
 resource_fields_cpee = {
 	'id': fields.Integer,
-	'url': fields.String
+	'url': fields.String,
+	'processed': fields.Integer
 }
 
 class CustomerList(Resource):
@@ -320,10 +326,32 @@ class CPEE(Resource):
 		if result:
 			abort(409, message="Item id taken...")
 
-		cpee = CallbackModel(id=cpee_id,  url = args['url'])
+		cpee = CallbackModel(id=cpee_id,  url = args['url'], processed = args['processed'])
 		db.session.add(cpee)
 		db.session.commit()
 		return cpee, 201
+
+	def delete(self, cpee_id):
+		#abort_if_video_id_doesnt_exist(video_id)
+		result = CallbackModel.query.filter_by(id=cpee_id).first()
+		db.session.delete(result)
+		db.session.commit()
+		return '', 204
+
+	@marshal_with(resource_fields_cpee)
+	def post(self, cpee_id):
+		args = cpee_update_args.parse_args()
+		result = CallbackModel.query.filter_by(id=cpee_id).first()
+		if not result:
+			abort(404, message="Cpee doesn't exist, cannot update")
+
+		if args['url']:
+			result.url = args['url']
+		if args['processed']:
+			result.processed = args['processed']
+
+		db.session.commit()
+		return result
 
 api.add_resource(HelloWorld, "/")
 #api.add_resource(Customer, "/customer/<int:customer_id>", "/customer/<int:customer_id>/update1")
@@ -357,6 +385,18 @@ def update_item():
 
 	result = ItemModel.query.filter_by(id=item_id).first()
 	result.stock = new_stock
+	
+	db.session.commit()
+	return result
+
+@app.route("/cpee/update", methods=['GET', 'POST'])
+@marshal_with(resource_fields_cpee)
+def update_cpee():
+	cpee_id = request.args.get('cpee_id')
+	processed = request.args.get('processed')
+
+	result = CallbackModel.query.filter_by(id=cpee_id).first()
+	result.processed = processed
 	
 	db.session.commit()
 	return result
@@ -439,10 +479,13 @@ def interface():
 	return_dic['work'] = 'BUC_VQ_3V3_sample=1[]_tambient=25[°C]_VQtyp=3.3[V]_TEMP=25[C]_variant=Water[]_VIN=3.62[V]_IQ=0[mA]_00001.mat'
 	list_Class = CallbackModel.query.all()
 	list_url = []
+	list_id = []
 	for item in list_Class:
-		list_url.append(item.url)
+		if item.processed != 1:
+			list_id.append(item.id)
+			list_url.append(item.url)
 	#return render_template('inter.html', working_item = return_dic['work'], url = return_callback.url)
-	return render_template('inter.html', working_item = return_dic['work'], urls = list_url)
+	return render_template('inter.html', working_item = return_dic['work'], ids = list_id, urls = list_url)
 
 if __name__ == "__main__":
     #sess = session.Session()
