@@ -30,6 +30,5 @@ response = requests.post(BASE + "cpee/3", {"processed": 150})
 #response = requests.get(BASE + "asnyc_return")
 #print(response.json())
 
-response = requests.delete(BASE + "cpee/8")
-
-response = requests.delete(BASE + "cpee/9")
+#for i in range(1, 17):   
+response = requests.delete(BASE + "cpee/" + str(17))
