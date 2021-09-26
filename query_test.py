@@ -8,11 +8,11 @@ BASE =  "http://127.0.0.1:9211/"
 # print(response.json())
 
 
-#data = [{"url": "http://127.0.0.1:9211/"}
-#]
+data = [{"url": "https://cpee.org/flow/engine/57161/callbacks/cf19a0f7628b335a81b75d571171babd/"}
+]
 
-#response = requests.put(BASE + "cpee/0" , data[0])
-#print(response.json())
-
-response = requests.get(BASE + "asnyc_return")
+response = requests.put(BASE + "cpee/1" , data[0])
 print(response.json())
+
+#response = requests.get(BASE + "asnyc_return")
+#print(response.json())

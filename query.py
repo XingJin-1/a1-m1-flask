@@ -4,8 +4,7 @@ import requests
 #scp /Users/jxxxxx/Desktop/askUser/askuser_interface.php lin.xing@lehre.bpm.in.tum.de:public_html
 #scp /Users/jxxxxx/Desktop/BPM/model/xing-a1-m1-subprocess-upload.xml lin.xing@lehre.bpm.in.tum.de:public_html
 #scp /Users/jxxxxx/PyProject/a1-m1-flask/sendsomething.php lin.xing@lehre.bpm.in.tum.de:public_html:async
-#scp -r /Users/jxxxxx/PyProject/a1-m1-flask ghibli@toydaria.wst.univie.ac.at:m1-3107
-
+#scp -r /Users/jxxxxx/PyProject/a1-m1-flask ghibli@toydaria.wst.univie.ac.at:m1-2509
 #BASE = "http://127.0.0.1:5000/"
 #BASE = "http://131.130.37.62:9211/"
 BASE = "http://127.0.0.1:9211/"
