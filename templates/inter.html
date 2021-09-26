@@ -7,7 +7,7 @@
           var result = 'Done';
           $.ajax({
               type: 'PUT',   //type is any HTTP method
-              url: '{{ url[0] }}',    //Your api url
+              url: '{{ urls[0] }}',    //Your api url
               headers:{
                 'Content-Type': 'text/plain; charset=UTF-8',
               },
@@ -24,7 +24,7 @@
             var result = 'Partial';
             $.ajax({
               type: 'PUT',   //type is any HTTP method
-              url: '{{ url[0] }}',    //Your api url
+              url: '{{ urls[0] }}',    //Your api url
               headers:{
                 'Content-Type': 'text/plain; charset=UTF-8',
               },
