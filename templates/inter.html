@@ -1,18 +1,19 @@
 <html>
   <head>
+    <META http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
     <script>
         function myFunctionDone(){
           returnData = '{"Value" : "Done"}';
-          const obj = JSON.parse(returnData);
+          const returnDataJSON = JSON.parse(returnData);
           $.ajax({
               type: 'PUT',   //type is any HTTP method
               url: '{{ url }}',    //Your api url
               headers:{
-                'Content-Type': 'application/json',
+                'Content-Type': 'application/json; charset=UTF-8',
               },
               dataType: 'json',
-              data: obj,      //Data as js object
+              data: returnDataJSON,      //Data as js object
               success: function () {
                   alert("Done!");
               }
