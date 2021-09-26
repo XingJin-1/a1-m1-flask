@@ -1,7 +1,7 @@
 import requests
 
-#BASE = "http://131.130.37.62:9211/"
-BASE =  "http://127.0.0.1:9211/"
+BASE = "http://131.130.37.62:9211/"
+#BASE =  "http://127.0.0.1:9211/"
 #response = requests.get(BASE + "asnyc_test")
 
 # response = requests.get(BASE + "cpee/0")
@@ -24,7 +24,12 @@ for i in range(len(data)):
 
 input()
 
-"""
+
 response = requests.post(BASE + "cpee/3", {"processed": 150})
+"""
 #response = requests.get(BASE + "asnyc_return")
 #print(response.json())
+
+response = requests.delete(BASE + "cpee/7")
+
+response = requests.delete(BASE + "cpee/8")
