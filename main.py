@@ -433,6 +433,10 @@ def get_difference():
 	return_string = '{"update":' + '"' + random.choice(items) + '"' + '}'
 	#return return_string
 	return json.loads(return_string)
+	
+@app.route("/hardcoded_response", methods=['GET'])
+def get_hardcoded_response():
+	return {'return':'HardcodedValue'}
 
 @app.route("/asnyc_request", methods=['GET'])
 def async_test():
