@@ -430,6 +430,15 @@ def ask_user():
 	return_dic['work'] = 'BUC_VQ_3V3_sample=1[]_tambient=25[°C]_VQtyp=3.3[V]_TEMP=25[C]_variant=Water[]_VIN=3.62[V]_IQ=0[mA]_00001.mat'
 	return render_template('hello.php', input = return_dic)
 
+@app.route("/interface", methods=['GET'])
+def interface():
+	return_dic = {}
+	#return_dic['x'] = request.args.get("x")
+	#return_dic['y'] = request.args.get("y")
+	return_callback = CallbackModel.query.filter_by(id=1).first()
+	return_dic['work'] = 'BUC_VQ_3V3_sample=1[]_tambient=25[°C]_VQtyp=3.3[V]_TEMP=25[C]_variant=Water[]_VIN=3.62[V]_IQ=0[mA]_00001.mat'
+	return render_template('inter.html', working_item = return_dic['work'], url = return_callback.url)
+
 if __name__ == "__main__":
     #sess = session.Session()
     #sess.init_app(app)
