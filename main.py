@@ -110,7 +110,7 @@ class TransactionModel(db.Model):
 		return f"Transaction(id_customer = {id_customer}, id_item = {id_item}, price = {price})"
 
 # ****************** run it at every beging when db has been changed ******************
-db.create_all()
+#db.create_all()
 # ****************** run it at every beging when db has been changed ******************
 
 define_arguments()
@@ -437,11 +437,17 @@ def interface():
 	#return_dic['y'] = request.args.get("y")
 	return_callback = CallbackModel.query.filter_by(id=1).first()
 	return_dic['work'] = 'BUC_VQ_3V3_sample=1[]_tambient=25[°C]_VQtyp=3.3[V]_TEMP=25[C]_variant=Water[]_VIN=3.62[V]_IQ=0[mA]_00001.mat'
-	return render_template('inter.html', working_item = return_dic['work'], url = return_callback.url)
+	list_Class = CallbackModel.query.all()
+	list_url = []
+	for item in list_Class:
+		list_url.append(item.url)
+	#return render_template('inter.html', working_item = return_dic['work'], url = return_callback.url)
+	return render_template('inter.html', working_item = return_dic['work'], urls = list_url)
 
 if __name__ == "__main__":
     #sess = session.Session()
     #sess.init_app(app)
+
     app.run(host='0.0.0.0',port=9211, debug=True)
 	#app.run(debug=True)
 
