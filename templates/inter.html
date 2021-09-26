@@ -4,8 +4,11 @@
     <script>
         function myFunctionDone(){
           $.ajax({
-              url: '{{ url }}',    //Your api url
               type: 'PUT',   //type is any HTTP method
+              url: '{{ url }}',    //Your api url
+              headers:{
+                'Content-Type': 'text/plain ; charset=utf-8', 
+              },
               data: {
                   data: '1'
               },      //Data as js object
