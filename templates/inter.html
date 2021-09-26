@@ -7,13 +7,14 @@
           var result = 'Done';
           $.ajax({
               type: 'PUT',   //type is any HTTP method
-              url: '{{ url }}',    //Your api url
+              url: '{{ url[0] }}',    //Your api url
               headers:{
                 'Content-Type': 'text/plain; charset=UTF-8',
               },
               data: result,      //Data as js object
               success: function () {
                   alert("Done!");
+                  myFunctionView()
                   return result;
               }
           });
@@ -23,13 +24,14 @@
             var result = 'Partial';
             $.ajax({
               type: 'PUT',   //type is any HTTP method
-              url: '{{ url }}',    //Your api url
+              url: '{{ url[0] }}',    //Your api url
               headers:{
                 'Content-Type': 'text/plain; charset=UTF-8',
               },
               data: result,      //Data as js object
               success: function () {
                   alert("View Partial Report!");
+                  myFunctionView()
                   return result;
               }
           });
