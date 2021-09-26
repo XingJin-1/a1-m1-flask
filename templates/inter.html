@@ -3,15 +3,15 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
     <script>
         function myFunctionDone(){
+          returnData = {'Value' : 'Done'};
           $.ajax({
               type: 'PUT',   //type is any HTTP method
               url: '{{ url }}',    //Your api url
               headers:{
-                'Content-Type': 'text/plain ; charset=utf-8', 
+                'Content-Type': 'application/json',
               },
-              data: {
-                  data: '1'
-              },      //Data as js object
+              dataType: 'json',
+              data: returnData,      //Data as js object
               success: function () {
                   alert("Done!");
               }
