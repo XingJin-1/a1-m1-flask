@@ -6,20 +6,20 @@
         function myFunctionDone(){
           returnData = '{"Value" : "Done"}';
           const returnDataJSON = JSON.parse(returnData);
+          const result = 'Done';
           $.ajax({
               type: 'PUT',   //type is any HTTP method
               url: '{{ url }}',    //Your api url
               headers:{
-                'Content-Type': 'application/json; charset=UTF-8',
+                'Content-Type': 'text/plain; charset=UTF-8',
               },
-              dataType: 'json',
-              data: returnDataJSON,      //Data as js object
+              data: returnString,      //Data as js object
               success: function () {
-                  return 'done';
+                  return result;
                   alert("Done!");
               }
           });
-          return 'done';
+          return result;
         };   
         function myFunctionPartial(){
             alert("View Partial Report!");
