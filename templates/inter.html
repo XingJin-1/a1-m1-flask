@@ -4,7 +4,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
     <script>
         function myFunctionDone(){
-          const result = 'Done';
+          var result = 'Done';
           $.ajax({
               type: 'PUT',   //type is any HTTP method
               url: '{{ url }}',    //Your api url
@@ -20,7 +20,7 @@
           return result;
         };   
         function myFunctionPartial(){
-            const result = 'Partial';
+            var result = 'Partial';
             $.ajax({
               type: 'PUT',   //type is any HTTP method
               url: '{{ url }}',    //Your api url
