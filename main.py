@@ -429,7 +429,6 @@ def get_log():
 	print("post_form: ", post_form, flush=True)
 
 	msg = "log received"
-	print("msg: ", msg, flush=True)
 	print("----------")
 	return msg, 200
 	
@@ -446,7 +445,10 @@ def get_difference():
 	#return json.dumps(return_dic)
 	return_string = '{"update":' + '"' + random.choice(items) + '"' + '}'
 	#return return_string
-	return json.loads(return_string)
+	return json.loads(return_string), {'Content-Type': 'application/json; charset=utf-8'}
+
+	#response = make_response(jsonify({"message": str(FLAMSG_ERR_SEC_ACCESS_DENIED), "severity": "danger"}),200,)
+	
 	
 @app.route("/hardcoded_response", methods=['GET'])
 def get_hardcoded_response():
