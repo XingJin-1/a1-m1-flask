@@ -417,8 +417,22 @@ def put_transaction():
 
 @app.route("/logs",  methods=['POST'])
 def get_log():
+	print("----------")
+	#request.environ.get('werkzeug.server.shutdown')
+	post_json = request.get_json()
+	print("post_json: ", post_json, flush=True)
+	post_data = request.get_data()
+	print("post_data: ", post_data, flush=True)
+	post_args = request.args
+	print("post_args: ", post_args, flush=True)
+	post_form = request.form
+	print("post_form: ", post_form, flush=True)
+
 	msg = "log received"
+	print("msg: ", msg, flush=True)
+	print("----------")
 	return msg, 200
+	
  # parse request .requests()
 
 @app.route("/check_difference", methods=['GET'])
