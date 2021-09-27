@@ -490,10 +490,20 @@ def interface():
 	#return render_template('inter.html', working_item = return_dic['work'], url = return_callback.url)
 	return render_template('inter.html', working_item = return_dic['work'], ids = list_id, urls = list_url)
 
+def shutdown_server():
+    func = request.environ.get('werkzeug.server.shutdown')
+    if func is None:
+        raise RuntimeError('Not running with the Werkzeug Server')
+    func()
+    
+@app.route('/shutdown', methods=['GET'])
+def shutdown():
+    shutdown_server()
+    return 'Server shutting down...'
+    
 if __name__ == "__main__":
     #sess = session.Session()
     #sess.init_app(app)
-
     app.run(host='0.0.0.0',port=9211, debug=True)
 	#app.run(debug=True)
 
