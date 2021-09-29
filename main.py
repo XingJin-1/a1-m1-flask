@@ -423,7 +423,7 @@ def get_log():
 	json_str = post_data.decode("UTF-8")
 	str_start = json_str.find('{')
 	str_end = json_str.rfind('}')
-	json_str = json_str[str_start:str_end]
+	json_str = json_str[str_start:str_end + 1]
 	print(type(json_str))
 	print(json_str)
 	post_data_json = json.loads(json_str)
