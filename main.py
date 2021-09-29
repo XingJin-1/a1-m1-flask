@@ -421,6 +421,7 @@ def get_log():
 	post_data = request.get_data()
 	#print("post_data: ", post_data, flush=True)
 	post_data_json = post_data.decode("UTF-8")
+	print(type(post_data_json))
 	print("post_data_json: ", post_data_json, flush=True)
 	msg = "log received"
 	print("----------")
