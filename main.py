@@ -420,8 +420,8 @@ def get_log():
 	print("----------")
 	post_data = request.get_data()
 	#print("post_data: ", post_data, flush=True) #--> with b'' 
-	#post_data_json = post_data.decode("UTF-8")
-	post_data_json = json.loads(post_data)
+	post_data_json_str = post_data.decode("UTF-8")
+	post_data_json = json.loads(post_data_json_str)
 	print(type(post_data_json))
 	print(post_data_json.keys())
 	print("post_data_json: ", post_data_json, flush=True)
