@@ -418,20 +418,13 @@ def put_transaction():
 @app.route("/logs",  methods=['POST'])
 def get_log():
 	print("----------")
-	#request.environ.get('werkzeug.server.shutdown')
-	post_json = request.get_json()
-	print("post_json: ", post_json, flush=True)
 	post_data = request.get_data()
-	print("post_data: ", post_data, flush=True)
-	post_args = request.args
-	print("post_args: ", post_args, flush=True)
-	post_form = request.form
-	print("post_form: ", post_form, flush=True)
-
+	#print("post_data: ", post_data, flush=True)
+	post_data_json = post_data.decode("UTF-8")
+	print("post_data_json: ", post_data_json, flush=True)
 	msg = "log received"
 	print("----------")
 	return msg, 200
-	
  # parse request .requests()
 
 @app.route("/check_difference", methods=['GET'])
@@ -448,7 +441,6 @@ def get_difference():
 	return json.loads(return_string), {'Content-Type': 'application/json; charset=utf-8'}
 
 	#response = make_response(jsonify({"message": str(FLAMSG_ERR_SEC_ACCESS_DENIED), "severity": "danger"}),200,)
-	
 	
 @app.route("/hardcoded_response", methods=['GET'])
 def get_hardcoded_response():
