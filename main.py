@@ -424,11 +424,11 @@ def get_log():
 	str_start = json_str.find('{')
 	str_end = json_str.rfind('}')
 	json_str = json_str[str_start:str_end + 1]
-	print(type(json_str))
-	print(json_str)
+
 	post_data_json = json.loads(json_str)
 	print(post_data_json.keys())
 	print("post_data_json: ", post_data_json, flush=True)
+	
 	msg = "log received"
 	print("----------")
 	return msg, 200
