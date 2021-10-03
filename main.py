@@ -427,7 +427,7 @@ def get_log():
 
 	post_data_json = json.loads(json_str)
 	#print("post_data_json: ", post_data_json, flush=True)
-	print("json_str: ", json_str, flush=True)
+	print(json_str, flush=True)
 
 	msg = "log received"
 	print("----------")
