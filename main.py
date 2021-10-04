@@ -13,9 +13,11 @@ import random
 import json
 import requests
 
+"""
 from elasticsearch import Elasticsearch, helpers
 from elk_obj_create import Create_Elk_Obj
 client = Create_Elk_Obj().get_elk_obj()
+"""
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -430,6 +432,7 @@ def get_log():
 	str_end = json_str.rfind('}')
 	json_str = json_str[str_start:str_end + 1]
 
+	"""
 	index_name = "log_test_2"
 	try:
 		cnt = Create_Elk_Obj().get_elk_count(index_name)
@@ -446,7 +449,6 @@ def get_log():
 
 	try:
 		print ("\nAttempting to index the list of docs using helpers.bulk()")
-
 		# use the helpers library's Bulk API to index list of Elasticsearch docs
 		resp = helpers.bulk(
 		client,
@@ -454,7 +456,6 @@ def get_log():
 		index = index_name,
 		doc_type = "_doc"
 		)
-
 		# print the response returned by Elasticsearch
 		print ("helpers.bulk() RESPONSE:", resp)
 		print ("helpers.bulk() RESPONSE:", json.dumps(resp, indent=4))
@@ -464,6 +465,7 @@ def get_log():
 		## Prerequisiteshile making the helpers.bulk() API call
 		print("Elasticsearch helpers.bulk() ERROR:", err)
 		quit()
+	"""
 
 	#post_data_json = json.loads(json_str)
 	#print("post_data_json: ", post_data_json, flush=True)
