@@ -13,6 +13,10 @@ import random
 import json
 import requests
 
+from elasticsearch import Elasticsearch, helpers
+from elk_obj_create import Create_Elk_Obj
+client = Create_Elk_Obj().get_elk_obj()
+
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -418,6 +422,7 @@ def put_transaction():
 @app.route("/logs",  methods=['POST'])
 def get_log():
 	print("----------")
+	doc_list = []
 	post_data = request.get_data()
 	#print("post_data: ", post_data, flush=True) #--> with b'' 
 	json_str = post_data.decode("UTF-8")
@@ -425,7 +430,42 @@ def get_log():
 	str_end = json_str.rfind('}')
 	json_str = json_str[str_start:str_end + 1]
 
-	post_data_json = json.loads(json_str)
+	index_name = "log_test_2"
+	try:
+		cnt = Create_Elk_Obj().get_elk_count(index_name)
+	except:
+		cnt = 0
+		print("This is a new index pattern", flush= True)
+	
+	doc = json_str.replace("True", "true")
+	doc = doc.replace("False", "false")
+	# convert the string to a dict object
+	dict_doc = json.loads(doc)
+	dict_doc["_id"] = cnt
+	doc_list += [dict_doc]
+
+	try:
+		print ("\nAttempting to index the list of docs using helpers.bulk()")
+
+		# use the helpers library's Bulk API to index list of Elasticsearch docs
+		resp = helpers.bulk(
+		client,
+		doc_list,
+		index = index_name,
+		doc_type = "_doc"
+		)
+
+		# print the response returned by Elasticsearch
+		print ("helpers.bulk() RESPONSE:", resp)
+		print ("helpers.bulk() RESPONSE:", json.dumps(resp, indent=4))
+
+	except Exception as err:
+		# print any errors returned w
+		## Prerequisiteshile making the helpers.bulk() API call
+		print("Elasticsearch helpers.bulk() ERROR:", err)
+		quit()
+
+	#post_data_json = json.loads(json_str)
 	#print("post_data_json: ", post_data_json, flush=True)
 	print(json_str, flush=True)
 
